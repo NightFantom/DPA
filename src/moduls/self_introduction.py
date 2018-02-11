@@ -7,6 +7,9 @@ class SelfIntroductionModule:
     INTENT_PATTERN = "   -{}"
     INTENT_WITH_DESC_PATTERN = "   -{}: {}"
 
+    def __init__(self, config):
+        pass
+
     def run(self, assistant, parameters_dict):
         intent = parameters_dict["Intent"]
         answer = None
@@ -15,7 +18,6 @@ class SelfIntroductionModule:
         elif intent == "Say hi":
             answer = AssistantAnswer(mc.HI_MESSAGE)
         return answer
-
 
     def ability_demonstration(self, assistant, parameters_dict):
         apps = assistant.application_dict

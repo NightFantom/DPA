@@ -1,113 +1,6 @@
 {
   "applications": [
-    {
-      "name": "Calendar",
-      "description": "App for calendar management",
-      "type": "Module",
-      "intents": [
-        {
-          "name": "Create remind",
-          "key_phrases": [
-            "remind"
-          ],
-          "parameters": [
-            {
-              "name": "Date",
-              "data_type": "Date",
-              "obligatory": true,
-              "question": "When should I remind you?"
-            },
-            {
-              "name": "Subject",
-              "data_type": "str",
-              "obligatory": true,
-              "question": "What should I remind you?",
-               "regexp": ".* remind .* to (.+)"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Home",
-      "description": "App for home management",
-      "type": "RemoteApp",
-      "url": "http://127.0.0.1:7878",
-      "intents": [
-        {
-          "name": "Set temperature",
-          "key_phrases": [
-            "set",
-            "set up"
-          ],
-          "samples": [
-            "Set temperature",
-            "Set temperature on 10",
-            "Set up temperature",
-            "Change temperature",
-            "Change temperature at kitchen",
-            "Change temperature at living room",
-            "Change temperature in living room",
-            "Set up temperature on num_token",
-            "Set air temperature at num_token degree"
-          ],
-          "parameters": [
-            {
-              "name": "temperature",
-              "data_type": "Number",
-              "obligatory": true,
-              "question": "What temperature I should setup?"
-            }
-          ]
-        },
-        {
-          "name": "Turn on something",
-          "key_phrases": [
-            "Turn on"
-          ],
-          "parameters": [
-            {
-              "name": "object",
-              "data_type": "str",
-              "obligatory": true,
-              "question": "What should I turn on?",
-              "regexp": ".* turn on ([a-zA-Z]+)"
-            }
-          ]
-        },
-        {
-          "name": "Turn off something",
-          "key_phrases": [
-            "Turn off"
-          ],
-          "parameters": [
-            {
-              "name": "object",
-              "data_type": "str",
-              "obligatory": true,
-              "question": "What should I turn off?",
-              "regexp": ".* turn off ([a-zA-Z]+)"
-            }
-          ]
-        },
-        {
-          "name": "Show dashboard",
-          "key_phrases": [
-            "Show"
-          ],
-          "parameters": [
-            {
-              "name": "sensor",
-              "data_type": "str",
-              "obligatory": true,
-              "question": "What sensor do you want to check?",
-              "regexp": ".* show ([a-zA-Z]+)"
-            }
-          ]
-        }
-      ]
-    },
-    {
+  {
       "name": "ExplanationModule",
       "description": "Module for introduction itself",
       "type": "Module",
@@ -124,7 +17,10 @@
             "What can you do to help",
             "How can you help",
             "Show me your abilities",
-            "Show me your opportunities"
+            "Show me your opportunities",
+            "Help",
+            "Ok, so what can you do?",
+            "Tell me about your self"
           ]
         },
         {
@@ -134,6 +30,179 @@
             "hi",
             "hello",
             "hey"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MathModule",
+      "description": "Module for solving math tasks",
+      "type": "Module",
+      "impl": "moduls.math_module.MathModule",
+      "intents": [
+        {
+          "name": "Welcome",
+          "samples": [
+            "Help me solve my math homework",
+            "Let's do math",
+            "Solve an equation for me",
+            "Do some math for me",
+            "I need your help with math",
+            "Solve for me the next math task",
+            "Solve for me equation"
+          ]
+        },
+        {
+          "name": "Solving mathematical tasks",
+          "key_phrases":[
+            "math",
+            "calculate",
+            "solve"
+          ],
+          "samples": [
+            "I want to calculate",
+            "Help me to calculate",
+            "calculate 1 + 5",
+            "calculate 2 - 6",
+            "calculate 3 * 7",
+            "calculate 4 / 8",
+            "calculate 0 = 9"
+          ],
+          "parameters": [
+            {
+              "name": "Request",
+              "data_type": "str",
+              "obligatory": true,
+              "question": "What would you like to solve?",
+              "regexp": "(.*math (.+)$)|(.*calculate (.+)$)|(.*solve (.+)$)",
+              "reqexp_group_id": [1,3,5]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Matches game",
+      "description": "Module for playing in Matches game",
+      "type": "Module",
+      "impl": "moduls.games.MatchesGameModule",
+      "intents": [
+        {
+          "name": "Start Matches Game",
+          "samples": [
+            "Play in Matches game",
+            "Matches game",
+            "Lets fight in Matches game",
+            "Restart Matches game",
+            "Reset matches game",
+            "Lets play in Matches game",
+            "Lets play in matches"
+          ],
+          "parameters": [
+            {
+              "name": "AmountOfMatches",
+              "data_type": "number",
+              "obligatory": false,
+              "question": "How much matches do you want to see on board?"
+            }
+          ]
+        },
+        {
+          "name": "Turn",
+          "samples": [
+            "I am taking 2 matches",
+            "I am taking 1",
+            "I will take 3"
+          ],
+          "parameters": [
+            {
+              "name": "Amount",
+              "data_type": "number",
+              "obligatory": true,
+              "question": "How much matches do you want to take?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TicTacToe game",
+      "description": "Module for playing in TicTacToe game",
+      "type": "Module",
+      "impl": "moduls.tic_tac_toe.TicTacToeModule",
+      "intents": [
+        {
+          "name": "Start Tic-Tac-Toe Game",
+          "samples": [
+            "Play in Tic Tac Toe game",
+            "Tic Tac Toe game",
+            "Lets fight in Tic Tac Toe game",
+            "Restart Tic Tac Toe game",
+            "Reset Tic Tac Toe game",
+            "Lets play in Tic Tac Toe game",
+            "Play in TicTacToe game",
+            "TicTacToe game",
+            "Lets fight in TicTacToe game",
+            "Restart TicTacToe game",
+            "Reset TicTacToe game",
+            "Lets play in TicTacToe game",
+            "TicTacToe",
+            "Tic Tac Toe",
+            "Tic-Tac-Toe",
+            "I want to play tic-tac-toe game",
+            "I want to play TicTacToe game"
+          ]
+        },
+        {
+          "name": "Turn",
+          "parameters": [
+            {
+              "name": "Position",
+              "data_type": "str",
+              "obligatory": true,
+              "question": "Where do you want to put your label?",
+              "regexp": "([A-Ea-e] ?\\d) ?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "XO game",
+      "description": "Module for playing in XO game",
+      "type": "Module",
+      "impl": "moduls.five_in_row_game.XOModule",
+      "intents": [
+        {
+          "name": "Start XO Game",
+          "samples": [
+            "Play in XO game",
+            "XO game",
+            "Lets fight in XO game",
+            "Restart XO game",
+            "Restart XO",
+            "Reset XO game",
+            "Lets play in XO game",
+            "Play in XO game",
+            "XO game",
+            "Lets fight in XO game",
+            "Restart XO game",
+            "Reset XO game",
+            "Lets play in XO game",
+            "XO",
+            "Let's play XO"
+          ]
+        },
+        {
+          "name": "Turn",
+          "parameters": [
+            {
+              "name": "Position",
+              "data_type": "str",
+              "obligatory": true,
+              "question": "Where do you want to put your label?",
+              "regexp": "([A-Ja-j] ?\\d{1,2}) ?"
+            }
           ]
         }
       ]
