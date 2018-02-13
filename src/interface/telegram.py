@@ -34,6 +34,8 @@ class Telegram(BaseInterface):
 
     def audio(self, bot, update):
         voice_file = bot.get_file(update.message.voice.file_id)
+        if voice_file.duration > 10:
+            return "Voice message too large (max 10 sec)"
         voice_file.download('voice.mp3')
         subprocess.call(['ffmpeg', '-i', 'voice.mp3',
                          'voice.wav'])
@@ -47,10 +49,12 @@ class Telegram(BaseInterface):
             if max_value is None or results.get(item) > max_value:
                 max_key = item
                 max_value = results.get(item)
-        bot.sendMessage(update.message.chat_id, text=("You said: " + max_key))
+        return max_key
 
     def idle_main(self, bot, update):
         request = update.message.text.strip()
+        if update.message.voice:
+            request = self.audio(bot, update)
         user_id = update.message.chat_id
         does_print = bool(self.config[PrintMessages])
         user_name = update.message.from_user.username
