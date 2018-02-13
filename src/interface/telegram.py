@@ -1,7 +1,12 @@
+import subprocess
+import uuid
+import wave
+import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from configs.config_constants import StartMessageKey, TokenKey, PrintMessages
+from configs.config_constants import StartMessageKey, TokenKey, PrintMessages, SpeechKey
 from assistant import Assistant
 from interface.base_interface import BaseInterface
+from language.models.en.speechrecognition import SpeechRecognition
 import logging
 
 USER_ASKS_PATTERN = "User {} {} asks: '{}'"
@@ -18,6 +23,7 @@ class Telegram(BaseInterface):
         self.__w2v = w2v
         self.__token = self.config[TokenKey]
         self.__START_MESSAGE_KEY = self.config[StartMessageKey]
+        self.__s2t = SpeechRecognition(self.config[SpeechKey])
         self.__user_assistant_dict = {}
 
         self.__updater = Updater(self.__token)
@@ -25,6 +31,23 @@ class Telegram(BaseInterface):
         dp.add_handler(CommandHandler("start", self.slash_start), group=0)
         dp.add_handler(CommandHandler("stop", self.slash_stop), group=0)
         dp.add_handler(MessageHandler(Filters.text, self.idle_main))
+
+    def audio(self, bot, update):
+        voice_file = bot.get_file(update.message.voice.file_id)
+        voice_file.download('voice.mp3')
+        subprocess.call(['ffmpeg', '-i', 'voice.mp3',
+                         'voice.wav'])
+        wf = wave.open('voice.wav', 'rb')
+        results = self.__s2t.ask_yandex('voice.wav', str(uuid.uuid4()).replace("-", ""), "en-US")
+        os.remove('voice.mp3')
+        os.remove('voice.wav')
+        max_key = None
+        max_value = None
+        for item in results:
+            if max_value is None or results.get(item) > max_value:
+                max_key = item
+                max_value = results.get(item)
+        bot.sendMessage(update.message.chat_id, text=("You said: " + max_key))
 
     def idle_main(self, bot, update):
         request = update.message.text.strip()
