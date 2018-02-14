@@ -41,7 +41,7 @@ class EnglishLanguageModel(LanguageModel):
         tokens_description = output["sentences"][0]["tokens"]
         token_list = []
         for description in tokens_description:
-            lemma = description["lemma"]
+            lemma = description["lemma"].lower()
             word = description["originalText"]
             pos_tag = description["pos"]
             pos_tag = self.convert_pos(pos_tag)

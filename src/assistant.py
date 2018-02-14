@@ -7,6 +7,8 @@ from configs.config_constants import HistoryFilePath, IsStubMode, WMDThresholdKe
 from form.form import Form
 import importlib
 
+GAME_TURN_INTENT_NAME = "Turn"
+
 
 class Assistant:
     def __init__(self, language_model, message_bundle, application_dict, config, **kargs):
@@ -18,6 +20,7 @@ class Assistant:
         self.__is_stub_mode = config[IsStubMode]
         self.__message_bundle = message_bundle
         self.__w2v = kargs["w2v"]
+        self.__game_app = None
         self.__user_id = kargs.get("user_id", "console")
         self.__modules = {}
 
@@ -25,52 +28,87 @@ class Assistant:
         request_information = self.language_model.parse(user_request_str)
 
         app, intent_description = self.__extract_app(request_information)
+
         if app is None or intent_description is None:
             if len(self.__stack) > 0:
                 form = self.__stack.pop(0)
                 app = form.get_app()
                 answer = self.__process_intent(app, request_information, form)
+            elif self.__game_app is not None:
+                class_name = self.__game_app.get_impl()
+                module = self.__get_module_by_class_name(class_name)
+                if module.is_active:
+                    app = self.__game_app
+                    intent_description = self.__game_app.get_intent_by_name(GAME_TURN_INTENT_NAME)
+                    form = Form(app, intent_description)
+                    answer = self.__process_intent(app, request_information, form)
+                else:
+                    answer = AssistantAnswer(mc.DID_NOT_UNDERSTAND)
             else:
                 answer = AssistantAnswer(mc.DID_NOT_UNDERSTAND)
         else:
+            if app.get_intent_by_name(GAME_TURN_INTENT_NAME) is not None:
+                self.__game_app = app
             form = Form(app, intent_description)
             answer = self.__process_intent(app, request_information, form)
 
+        if answer is None:
+            answer = AssistantAnswer(mc.DID_NOT_UNDERSTAND)
         formated_answer = self.format_answer(answer)
         self.__history.append((user_request_str, formated_answer))
-        return formated_answer
+        return answer
 
     def __get_module_by_class_name(self, clazz):
         module = self.__modules.get(clazz, None)
         if module is None:
             module_name, class_name = clazz.rsplit(".", 1)
             MyClass = getattr(importlib.import_module(module_name), class_name)
-            module = MyClass()
+            module = MyClass(self.__config)
             self.__modules[clazz] = module
         return module
+
+    def __find_intent_by_samples(self, request_information):
+        temp_list = request_information.get_tokens_list()
+        new_request_list = []
+        for token in temp_list:
+            new_request_list.append(token.get_lemma())
+
+        app = None
+        intent_description = None
+        min_dist = float(self.__config[WMDThresholdKey])
+        for app_name, app_description in self.__application_dict.items():
+            for intent in app_description.get_intents_list():
+                samples = intent.get_samples()
+                if samples is not None:
+                    for sample in samples:
+                        dist = self.__w2v.wmdistance(new_request_list, sample)
+                        if dist < min_dist:
+                            min_dist = dist
+                            app = app_description
+                            intent_description = intent
+        return app, intent_description
+
+    def __find_intent_by_intersection_words(self, request_information):
+        app = None
+        intent_description = None
+        for app_name, app_imp in self.__application_dict.items():
+            intents_dict = app_imp.get_intents()
+            for intent_key, intent in intents_dict.items():
+                for token in request_information.get_tokens_list():
+                    if token.get_lemma() == intent_key:
+                        app = app_imp
+                        intent_description = intent
+                        return app, intent_description
+        return app, intent_description
 
     def __extract_app(self, request_information):
         app_name = request_information.get_app_name()
         app_name = app_name.lower()
         app = self.__application_dict.get(app_name, None)
-        intent_description = None
         if app is None:
-            temp_list = request_information.get_tokens_list()
-            new_request_list = []
-            for token in temp_list:
-                new_request_list.append(token.get_lemma())
-
-            min_dist = float(self.__config[WMDThresholdKey])
-            for app_name, app_description in self.__application_dict.items():
-                for intent in app_description.get_intents_list():
-                    samples = intent.get_samples()
-                    if samples is not None:
-                        for sample in samples:
-                            dist = self.__w2v.wmdistance(new_request_list, sample)
-                            if dist < min_dist:
-                                min_dist = dist
-                                app = app_description
-                                intent_description = intent
+            app, intent_description = self.__find_intent_by_samples(request_information)
+            if intent_description is None:
+                app, intent_description = self.__find_intent_by_intersection_words(request_information)
         else:
             lemma = request_information.get_intent().get_lemma()
             intent_description = app.get_intent(lemma)

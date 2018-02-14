@@ -82,5 +82,5 @@ def get_lemmas(text, language_model):
     tokens = language_model.tokenize(text)
     new_request_list = []
     for token in tokens:
-        new_request_list.append(token.get_lemma())
+        new_request_list.append(token.get_lemma().lower())
     return new_request_list
