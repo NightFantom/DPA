@@ -30,11 +30,12 @@ class Telegram(BaseInterface):
         dp = self.__updater.dispatcher
         dp.add_handler(CommandHandler("start", self.slash_start), group=0)
         dp.add_handler(CommandHandler("stop", self.slash_stop), group=0)
+        dp.add_handler(MessageHandler(Filters.voice, self.idle_main))
         dp.add_handler(MessageHandler(Filters.text, self.idle_main))
 
     def audio(self, bot, update):
         voice_file = bot.get_file(update.message.voice.file_id)
-        if voice_file.duration > 10:
+        if update.message.voice.duration > 10:
             return "Voice message too large (max 10 sec)"
         voice_file.download('voice.mp3')
         subprocess.call(['ffmpeg', '-i', 'voice.mp3',
@@ -52,8 +53,9 @@ class Telegram(BaseInterface):
         return max_key
 
     def idle_main(self, bot, update):
-        request = update.message.text.strip()
-        if update.message.voice:
+        if update.message.text is not None:
+            request = update.message.text.strip()
+        else:
             request = self.audio(bot, update)
         user_id = update.message.chat_id
         does_print = bool(self.config[PrintMessages])
