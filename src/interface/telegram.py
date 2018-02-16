@@ -38,9 +38,8 @@ class Telegram(BaseInterface):
         if update.message.voice.duration > 10:
             return "Null"
         voice_file.download('voice.mp3')
-        subprocess.call(['ffmpeg', '-i', 'voice.mp3',
+        subprocess.call(['c:/ProgramMy/ffmpeg/bin/ffmpeg', '-y', '-i', 'voice.mp3',
                          'voice.wav'])
-        wf = wave.open('voice.wav', 'rb')
         results = self.__s2t.ask_yandex('voice.wav', str(uuid.uuid4()).replace("-", ""), "en-US")
         os.remove('voice.mp3')
         os.remove('voice.wav')
