@@ -74,7 +74,7 @@
               "data_type": "str",
               "obligatory": true,
               "question": "What would you like to solve?",
-              "regexp": "(.*math (.+)$)|(.*calculate (.+)$)|(.*solve (.+)$)",
+              "regexp": "(?i)(.*math (.+)$)|(?i)(.*calculate (.+)$)|(?i)(.*solve (.+)$)",
               "reqexp_group_id": [1,3,5]
             }
           ]
@@ -202,6 +202,85 @@
               "obligatory": true,
               "question": "Where do you want to put your label?",
               "regexp": "([A-Ja-j] ?\\d{1,2}) ?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FactModule",
+      "description": "Module that generates facts",
+      "type": "Module",
+      "impl": "moduls.facts_module.FactModule",
+      "intents": [
+        {
+          "name": "Welcome",
+          "samples": [
+            "Facts guide"
+          ]
+        },
+        {
+          "name": "Random fact",
+          "key_phrases":[
+            "random",
+            "rnd"
+          ],
+          "samples": [
+            "Random fact",
+            "Give me some fact"
+          ]
+        },
+        {
+          "name": "Fact about",
+          "key_phrases":[
+            "fact",
+            "tell me",
+            "facts"
+          ],
+          "samples": [
+            "Give me some fact about ..",
+            "Fact about Stas",
+            "Tell me something about Innopolis University"
+          ],
+          "parameters": [
+            {
+              "name": "Request",
+              "data_type": "str",
+              "obligatory": true,
+              "question": "What do you want fact about?",
+              "regexp": "(?i)(.*fact (.+)$)|(?i)(.*tell me (.+)$)",
+              "reqexp_group_id": [1,3]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Language translation",
+      "description": "Module for translation of interface",
+      "type": "Module",
+      "impl": "moduls.language_selector.LanguageSelector",
+      "intents": [
+        {
+          "name": "Change a language",
+          "samples": [
+            "change language on Spain",
+            "set up Russian language",
+            "set Russian language",
+            "switch on English",
+            "speak with me on English",
+            "speak with me on English language",
+            "tell on Spain",
+            "lets speak on Spain"
+          ],
+          "parameters": [
+            {
+              "name": "language",
+              "data_type": "str",
+              "obligatory": true,
+              "question": "What language do you want to chat on? Beside English I speak on Russian, Spain, Italian and Polish",
+              "regexp": "(^|.* )(russian|Russian|spain|Spain|english|English|italian|Italian|polish|Polish)( .*|$)",
+              "reqexp_group_id": [1]
             }
           ]
         }

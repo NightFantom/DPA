@@ -48,6 +48,10 @@ class LanguageModel:
     def get_language_name(self):
         pass
 
+    @property
+    def language_code(self):
+        pass
+
     def __preprocess_text(self, string):
         return string
 

@@ -18,8 +18,7 @@ class Console(BaseInterface):
         while request != "exit":
             try:
                 answer = self.__assistant.process_request(request)
-                message = self.format_answer(answer)
-                print("Masha: " + message)
+                print("Masha: " + answer.message)
             except Exception:
                 logging.error(traceback.print_exc())
             request = input("User: ")

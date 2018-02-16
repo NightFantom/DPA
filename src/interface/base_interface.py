@@ -18,15 +18,5 @@ class BaseInterface:
     def config(self):
         return self.__config
 
-    def format_answer(self, assistant_answer):
-        if assistant_answer.message_key is not None:
-            message = self.__message_bundle[assistant_answer.message_key]
-            params = assistant_answer.parameters
-            if params is not None:
-                message = message.format(**params)
-        else:
-            message = assistant_answer.message
-        return message
-
     def __call__(self, *args, **kwargs):
         self.start()

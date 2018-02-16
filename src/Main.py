@@ -5,6 +5,7 @@ from interface.console import Console
 from interface.telegram import Telegram
 from language.models.en.english_language_model import EnglishLanguageModel
 from configs.config_constants import InterfaceTypeKey, LogLevelKey, IsStubMode, W2VModelPathKey, W2VModelFileTypeKey
+from moduls.facts_module import FactGenerator
 from gensim.models.keyedvectors import KeyedVectors
 from threading import Thread
 from distutils.util import strtobool
@@ -34,6 +35,9 @@ def start():
     message_bundle = config_parser["DEFAULT"]
 
     app_dict = load_config("ApplicationConfig.json", language_model)
+
+    print("Fitting facts generator")
+    FactGenerator(default_config)
 
     print("Started initialization of Word2Vect")
     is_binary_w2v = strtobool(default_config[W2VModelFileTypeKey])

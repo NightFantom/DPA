@@ -18,6 +18,10 @@ class AssistantAnswer:
     def message(self):
         return self.__message
 
+    @message.setter
+    def message(self, message):
+        self.__message = message
+
     def is_error(self):
         return self.__is_error
 

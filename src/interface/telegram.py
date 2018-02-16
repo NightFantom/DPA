@@ -69,7 +69,7 @@ class Telegram(BaseInterface):
                                   self.config, w2v=self.__w2v, user_id=user_id)
             self.__user_assistant_dict[user_id] = assistant
         answer = assistant.process_request(request)
-        message = self.format_answer(answer)
+        message = answer.message
         if does_print:
             print(ASSISTANT_ANSWERS_PATTERN.format(user_id, user_name, message))
         bot.sendMessage(update.message.chat_id, text=message)

@@ -5,6 +5,7 @@ from answer import AssistantAnswer
 from application.application import IntegrationType
 from configs.config_constants import HistoryFilePath, IsStubMode, WMDThresholdKey
 from form.form import Form
+from language.translate import Translate
 import importlib
 
 GAME_TURN_INTENT_NAME = "Turn"
@@ -23,8 +24,14 @@ class Assistant:
         self.__game_app = None
         self.__user_id = kargs.get("user_id", "console")
         self.__modules = {}
+        self.__user_defined_lang = self.language_model.language_code
+        self._translate_module = Translate(config)
 
     def process_request(self, user_request_str):
+        dest_lang = self.language_model.language_code
+        if self.__user_defined_lang != dest_lang:
+            user_request_str = self._translate_module.translate(user_request_str, self.__user_defined_lang, dest_lang)
+
         request_information = self.language_model.parse(user_request_str)
 
         app, intent_description = self.__extract_app(request_information)
@@ -54,8 +61,9 @@ class Assistant:
 
         if answer is None:
             answer = AssistantAnswer(mc.DID_NOT_UNDERSTAND)
-        formated_answer = self.format_answer(answer)
-        self.__history.append((user_request_str, formated_answer))
+        formatted_answer = self.format_answer(answer)
+        answer.message = formatted_answer
+        self.__history.append((user_request_str, formatted_answer))
         return answer
 
     def __get_module_by_class_name(self, clazz):
@@ -168,8 +176,22 @@ class Assistant:
                 message = message.format(**params)
         else:
             message = answer.message
+        dest_lang = self.language_model.language_code
+        if self.__user_defined_lang != dest_lang:
+            message = self._translate_module.translate(message, dest_lang, self.__user_defined_lang)
+
         return message
 
     @property
     def application_dict(self):
         return self.__application_dict
+
+
+    @property
+    def user_defined_language(self):
+        return self.__user_defined_lang
+
+    @user_defined_language.setter
+    def user_defined_language(self, lang):
+        if lang is not None:
+            self.__user_defined_lang = lang.lower()

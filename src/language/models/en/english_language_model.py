@@ -10,6 +10,7 @@ from language.models.language_model import LanguageModel
 class EnglishLanguageModel(LanguageModel):
 
     __name = "English"
+    __code = "en"
 
     def __init__(self, config):
         self.__server = StanfordCoreNLP(config[CoreNLPServerAddress])
@@ -32,6 +33,10 @@ class EnglishLanguageModel(LanguageModel):
 
     def get_language_name(self):
         return EnglishLanguageModel.__name
+
+    @property
+    def language_code(self):
+        return EnglishLanguageModel.__code
 
     def tokenize(self, string):
         output = self.__server.annotate(string, properties={
