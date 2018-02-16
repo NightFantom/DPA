@@ -72,7 +72,10 @@ class Telegram(BaseInterface):
             message = answer.message
         else:
             # Надо будет убрать
-            message = "Sorry, you message too long. Maximal length is 10 seconds"
+            if update.message.voice.duration < 10:
+                message = "Sorry, I could not recognize your speech"
+            else:
+                message = "Sorry, you message too long. Maximal length is 10 seconds"
             answer = AssistantAnswer(None, message_str=message)
 
         if does_print:
