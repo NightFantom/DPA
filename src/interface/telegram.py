@@ -3,6 +3,8 @@ import uuid
 import wave
 import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+from answer import AssistantAnswer
 from configs.config_constants import StartMessageKey, TokenKey, PrintMessages, SpeechKey
 from assistant import Assistant
 from interface.base_interface import BaseInterface
@@ -30,27 +32,24 @@ class Telegram(BaseInterface):
         dp = self.__updater.dispatcher
         dp.add_handler(CommandHandler("start", self.slash_start), group=0)
         dp.add_handler(CommandHandler("stop", self.slash_stop), group=0)
-        dp.add_handler(MessageHandler(Filters.voice, self.idle_main))
-        dp.add_handler(MessageHandler(Filters.text, self.idle_main))
+        dp.add_handler(MessageHandler(Filters.voice | Filters.text, self.idle_main))
 
     def audio(self, bot, update):
         voice_file = bot.get_file(update.message.voice.file_id)
-        if update.message.voice.duration > 10:
-            return "Null"
-        voice_file.download('voice.mp3')
-        subprocess.call(['c:/ProgramMy/ffmpeg/bin/ffmpeg', '-y', '-i', 'voice.mp3',
-                         'voice.wav'])
-        results = self.__s2t.ask_yandex('voice.wav', str(uuid.uuid4()).replace("-", ""), "en-US")
-        os.remove('voice.mp3')
-        os.remove('voice.wav')
         max_key = None
-        max_value = None
-        for item in results:
-            if max_value is None or results.get(item) > max_value:
-                max_key = item
-                max_value = results.get(item)
-        if max_key is None:
-            return "Null"
+        if update.message.voice.duration < 10:
+            voice_file.download('voice.mp3')
+            subprocess.call(['ffmpeg', '-y', '-i', 'voice.mp3',
+                             'voice.wav'])
+            results = self.__s2t.ask_yandex('voice.wav', str(uuid.uuid4()).replace("-", ""), "en-US")
+            os.remove('voice.mp3')
+            os.remove('voice.wav')
+            max_key = None
+            max_value = None
+            for item in results:
+                if max_value is None or results.get(item) > max_value:
+                    max_key = item
+                    max_value = results.get(item)
         return max_key
 
     def idle_main(self, bot, update):
@@ -68,8 +67,14 @@ class Telegram(BaseInterface):
             assistant = Assistant(self.__language_model, self.message_bundle, self.__app_dict,
                                   self.config, w2v=self.__w2v, user_id=user_id)
             self.__user_assistant_dict[user_id] = assistant
-        answer = assistant.process_request(request)
-        message = answer.message
+        if request is not None:
+            answer = assistant.process_request(request)
+            message = answer.message
+        else:
+            # Надо будет убрать
+            message = "Sorry, you message too long. Maximal length is 10 seconds"
+            answer = AssistantAnswer(None, message_str=message)
+
         if does_print:
             print(ASSISTANT_ANSWERS_PATTERN.format(user_id, user_name, message))
         bot.sendMessage(update.message.chat_id, text=message)
