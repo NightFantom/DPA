@@ -36,7 +36,7 @@ class Telegram(BaseInterface):
     def audio(self, bot, update):
         voice_file = bot.get_file(update.message.voice.file_id)
         if update.message.voice.duration > 10:
-            return "Voice message too large (max 10 sec)"
+            return "Null"
         voice_file.download('voice.mp3')
         subprocess.call(['ffmpeg', '-i', 'voice.mp3',
                          'voice.wav'])
@@ -50,6 +50,8 @@ class Telegram(BaseInterface):
             if max_value is None or results.get(item) > max_value:
                 max_key = item
                 max_value = results.get(item)
+        if max_key is None:
+            return "Null"
         return max_key
 
     def idle_main(self, bot, update):
