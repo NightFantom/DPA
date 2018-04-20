@@ -1,7 +1,6 @@
 from answer import AssistantAnswer
 from enum import Enum
-from PIL import Image, ImageFont, ImageDraw
-from string import ascii_uppercase
+from constants import FORM_ACTION_NAME
 from io import BytesIO
 import random
 from moduls.tic_tac_toe import Board
@@ -23,7 +22,7 @@ class XOModule:
 
 
     def run(self, assistant, parameters_dict):
-        intent = parameters_dict["Intent"]
+        intent = parameters_dict[FORM_ACTION_NAME]
         answer = None
         if intent == "Start XO Game":
             answer = self.start(assistant, parameters_dict)

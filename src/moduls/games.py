@@ -1,5 +1,7 @@
 from answer import AssistantAnswer
 import random
+from constants import FORM_ACTION_NAME
+
 
 class MatchesBot:
     def move(self, left):
@@ -17,7 +19,7 @@ class MatchesGameModule:
         self.bot = MatchesBot()
 
     def run(self, assistant, parameters_dict):
-        intent = parameters_dict["Intent"]
+        intent = parameters_dict[FORM_ACTION_NAME]
         answer = None
         if intent == "Start Matches Game":
             answer = self.start(assistant, parameters_dict)

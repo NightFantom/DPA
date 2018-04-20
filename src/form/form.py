@@ -2,6 +2,7 @@ from answer import AssistantAnswer
 from application.data_type import DataType
 from language.models.named_entity_recognition import NERType
 from language.models.request_type import RequestType
+from constants import FORM_ACTION_NAME
 
 
 class Form:
@@ -9,7 +10,7 @@ class Form:
         self.__app = app
         self.__int_desc = intent_description
         self.__parameters_value = dict()
-        self.__parameters_value["Intent"] = intent_description.get_name()
+        self.__parameters_value[FORM_ACTION_NAME] = intent_description.get_name()
         self.__is_finish = False
         self.__expected_field = None
 

@@ -1,5 +1,4 @@
 import json
-import importlib
 from application.application import Application
 from application.application import IntegrationType
 from application.intent import Intent
@@ -7,6 +6,7 @@ from application.parameter import Parameter
 from application.data_type import DataType
 
 APPLICATIONS_TAG = "applications"
+APPLICATION_TURN_ON = "turn_on"
 APPLICATION_NAME_TAG = "name"
 APPLICATION_DESCRIPTION_TAG = "description"
 APPLICATION_TYPE_TAG = "type"
@@ -35,6 +35,9 @@ def load_config(path_str, language_model):
 
     app_dict = {}
     for app in data[APPLICATIONS_TAG]:
+        turn_on = bool(app[APPLICATION_TURN_ON])
+        if not turn_on:
+            continue
         app_name = app[APPLICATION_NAME_TAG]
         description = app[APPLICATION_DESCRIPTION_TAG]
         type = app[APPLICATION_TYPE_TAG]

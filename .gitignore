@@ -1,3 +1,5 @@
 .idea
 __pycache__
-data/history*.txt
+histories/history*.txt
+data/word2vect_300.bin
+src/configs/config.ini

@@ -2,7 +2,7 @@ import wolframalpha
 import language.models.message_constant as mc
 from answer import AssistantAnswer
 from configs.config_constants import WolframAlphaAppIdKey
-
+from constants import FORM_ACTION_NAME
 
 IMG = 'img'
 PLAIN_TEXT = 'plaintext'
@@ -18,7 +18,7 @@ class MathModule:
         self.__app_id = config[WolframAlphaAppIdKey]
 
     def run(self, assistant, parameters_dict):
-        intent = parameters_dict["Intent"]
+        intent = parameters_dict[FORM_ACTION_NAME]
         answer = None
         if intent == "Welcome":
             answer = AssistantAnswer(mc.MATH_MODULE_INTRODUCTION_MESSAGE)
