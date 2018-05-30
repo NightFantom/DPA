@@ -33,13 +33,7 @@ class TicTacToeModule:
         self.is_started = True
         self.__game = TicTacToeLogic(font_path=self.__config[TicTacToeFontPath])
         board = self.__game.get_image_board()
-        param = dict()
-        param["label"] = self.__game.plr_fig
-        if self.__game.is_bot_first:
-            message_key = "tictactoe.start_game_key.bot_turn"
-        else:
-            message_key = "tictactoe.start_game_key.user_turn"
-        return AssistantAnswer(message_key, param, picture=board)
+        return AssistantAnswer(None, message_str="Start TicTacToe Game", picture=board)
 
     def turn(self, assistant, parameters_dict):
         pos = parameters_dict["Position"].lower()
@@ -63,6 +57,7 @@ class TicTacToeModule:
             par["message"] = error_message
         else:
             message_key = "tictactoe_draw_error"
+            self.is_started = False
 
         return AssistantAnswer(message_key, par, picture=board)
 
@@ -142,14 +137,15 @@ class TicTacToe:
             return GameStatus.DRAW, "Board is full"
         if TicTacToe.is_winnable(self.board, self.n):
             return GameStatus.PLAYING, None
-        return GameStatus.PLAYING, None
+        return GameStatus.DRAW , None
 
 
     def make_move(self, xy, player):
         x, y = xy
-        if self.game_status()[0] in (GameStatus.LOSE, GameStatus.DRAW, GameStatus.WIN):
+        if self.game_status()[0] in (GameStatus.LOSE, GameStatus.WIN):
             return GameStatus.ERROR, "Game already is over"
-
+        if not self._can_move():
+            return GameStatus.ERROR, "Board is full"
         if x < 0 or self.n <= x or y < 0 or self.n <= y:
             return GameStatus.ERROR, "Board out of range"
         if self.board[x][y] != ".":
@@ -243,16 +239,16 @@ class TicTacToeLogic:
 
     _FIGURES = ["X", "O"]
     def __init__(self, n=3, font_path=""):
-        self.is_bot_first = random.randint(0, 1)
+        is_bot_first = random.randint(0, 1)
 
         self.__field_size = n
-        self.plr_fig = self._FIGURES[self.is_bot_first]
+        self.plr_fig = self._FIGURES[is_bot_first]
         self.state = TicTacToe(self.__field_size)
         self.bot = CleverBot(self.__field_size)
-        self.bot_fig = self._FIGURES[1-self.is_bot_first]
+        self.bot_fig = self._FIGURES[1-is_bot_first]
         self.image = Board(n, font_path)
 
-        if self.is_bot_first:
+        if is_bot_first:
             bot_xy = self.bot.move(deepcopy(self.state.board), self.bot_fig)
             self._move_with_player(bot_xy, self.bot_fig)
 
@@ -269,7 +265,11 @@ class TicTacToeLogic:
 
     def move(self, xy):
         self._move_with_player(xy, self.plr_fig)
-        if self.status[0] != GameStatus.PLAYING:
+        if self.status[0] == GameStatus.ERROR:
+            return self.get_board()
+        if self.status[0] in (GameStatus.LOSE, GameStatus.WIN):
+            return self.get_board()
+        if not self.state._can_move():
             return self.get_board()
 
         bot_xy = self.bot.move(deepcopy(self.state.board), self.bot_fig)
