@@ -4,3 +4,4 @@ pip install pyemd
 pip install pycorenlp
 pip install yandex.translate
 pip install -U gensim
+pip install wolframalpha

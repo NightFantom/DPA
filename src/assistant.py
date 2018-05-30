@@ -1,4 +1,7 @@
+from collections import OrderedDict
 from pathlib import Path
+from typing import Any, Dict
+import pandas as pd
 import requests
 import language.models.message_constant as mc
 from answer import AssistantAnswer
@@ -7,18 +10,28 @@ from configs.config_constants import HistoryFilePath, IsStubMode, WMDThresholdKe
 from form.form import Form
 from language.translate import Translate
 import importlib
+import distutils.util as utils
+import json
 
-GAME_TURN_INTENT_NAME = "Turn"
+DEFAULT_ENCODING: str = "utf-8"
+GAME_TURN_INTENT_NAME: str = "Turn"
 
 
 class Assistant:
+    __MARK: str = "mark"
+    __REQUEST: str = "request"
+    __FORMATTED_ANSWER: str = "formatted_answer"
+    __ANSWER_KEY: str = "answer_key"
+    __DIALOG_STEP: str = "dialog_step"
+    __NO_MARK: int = -1
+
     def __init__(self, language_model, message_bundle, application_dict, config, **kargs):
         self.language_model = language_model
         self.__application_dict = application_dict
         self.__stack = []
-        self.__history = []
+        self.__history: OrderedDict = OrderedDict()
         self.__config = config
-        self.__is_stub_mode = config[IsStubMode]
+        self.__is_stub_mode = utils.strtobool(config[IsStubMode])
         self.__message_bundle = message_bundle
         self.__w2v = kargs["w2v"]
         self.__game_app = None
@@ -26,6 +39,7 @@ class Assistant:
         self.__modules = {}
         self.__user_defined_lang = self.language_model.language_code
         self._translate_module = Translate(config)
+        self.__dialog_step = 0
 
     def process_request(self, user_request_str):
         dest_lang = self.language_model.language_code
@@ -63,7 +77,27 @@ class Assistant:
             answer = AssistantAnswer(mc.DID_NOT_UNDERSTAND)
         formatted_answer = self.format_answer(answer)
         answer.message = formatted_answer
-        self.__history.append((user_request_str, formatted_answer))
+
+        step_desc: Dict[str, Any] = {
+            Assistant.__REQUEST: user_request_str,
+            Assistant.__FORMATTED_ANSWER: formatted_answer,
+            Assistant.__ANSWER_KEY: answer.message_key,
+            Assistant.__MARK: Assistant.__NO_MARK,
+            Assistant.__DIALOG_STEP: self.__dialog_step
+        }
+        self.__history[self.__dialog_step] = step_desc
+        answer.dialog_step = self.__dialog_step
+        self.__dialog_step += 1
+        return answer
+
+    def mark(self, dialog_step: int, mark: int) -> AssistantAnswer:
+        step_desc: Dict[str, Any] = self.__history.get(dialog_step)
+        answer = None
+        if step_desc and step_desc[Assistant.__MARK] == -1:
+            step_desc[Assistant.__MARK] = mark
+            answer = AssistantAnswer(mc.FEEDBACK)
+            formatted_answer = self.format_answer(answer)
+            answer.message = formatted_answer
         return answer
 
     def __get_module_by_class_name(self, clazz):
@@ -139,9 +173,13 @@ class Assistant:
         elif not self.__is_stub_mode:
             url = app.get_endpoint_url()
             try:
-                response = requests.post(url, data=parameters_dict)
+                response = requests.post(url, data=json.dumps(parameters_dict))
                 if response.status_code == 200:
-                    answer = AssistantAnswer(None, message_str=response.json())
+                    response_dict = response.json()
+                    message_source: Dict[str, str] = response_dict.get("answer")
+                    if not message_source:
+                        message_source = response_dict.get("error")
+                    answer = AssistantAnswer(message_source["message_key"], message_str=message_source["message"])
                 else:
                     answer = AssistantAnswer(mc.ERROR_RESPONSE_CODE, parameters_dict={"code": response.status_code})
             except Exception:
@@ -154,27 +192,30 @@ class Assistant:
         return answer
 
     def stop(self):
-        path = Path(self.__config[HistoryFilePath].format(self.__user_id))
-        file = None
-        try:
-            if path.exists():
-                file = open(path, encoding="utf-8", mode="a")
-            else:
-                file = open(path, encoding="utf-8", mode="w")
-            for t in self.__history:
-                file.write("U:" + t[0] + "\n")
-                file.write("A:" + t[1] + "\n")
-        finally:
-            if file is not None:
-                file.close()
+        if len(self.__history) > 0:
+            path = Path(self.__config[HistoryFilePath].format(self.__user_id))
+            columns: Dict[str, Any] = {
+                Assistant.__MARK: [],
+                Assistant.__FORMATTED_ANSWER: [],
+                Assistant.__ANSWER_KEY: [],
+                Assistant.__REQUEST: [],
+                Assistant.__DIALOG_STEP: []
+            }
+            for dialog_step, desc in self.__history.items():
+                for column_name, value in desc.items():
+                    columns[column_name].append(value)
+
+            pd.DataFrame(data=columns).to_csv(path, index=False, encoding=DEFAULT_ENCODING)
 
     def format_answer(self, answer):
+        message: str = None
         if answer.message_key is not None:
-            message = self.__message_bundle[answer.message_key]
-            params = answer.parameters
-            if params is not None:
-                message = message.format(**params)
-        else:
+            message = self.__message_bundle.get(answer.message_key)
+            if message:
+                params = answer.parameters
+                if params is not None:
+                    message = message.format(**params)
+        if not message:
             message = answer.message
         dest_lang = self.language_model.language_code
         if self.__user_defined_lang != dest_lang:
@@ -185,7 +226,6 @@ class Assistant:
     @property
     def application_dict(self):
         return self.__application_dict
-
 
     @property
     def user_defined_language(self):

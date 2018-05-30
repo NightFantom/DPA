@@ -10,6 +10,7 @@ from gensim.models.keyedvectors import KeyedVectors
 from threading import Thread
 from distutils.util import strtobool
 import logging
+import os
 
 STARTED_WORKING_MESSAGE = "Assistant started working"
 TELEGRAM = "telegram"
@@ -18,8 +19,11 @@ CONSOLE = "console"
 
 def start():
     print("Started initialization")
+    config_path = "configs/config.ini"
+    if not os.path.isfile(config_path):
+        config_path = "configs/default_config.ini"
     config_parser = ConfigParser()
-    config_parser.read("configs/config.ini", encoding="utf-8")
+    config_parser.read(config_path, encoding="utf-8")
     default_config = config_parser["DEFAULT"]
 
     logging.basicConfig(level=default_config[LogLevelKey],

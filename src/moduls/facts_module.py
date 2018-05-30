@@ -1,7 +1,7 @@
 import language.models.message_constant as mc
 from configs.config_constants import FactsFilePath
 from answer import AssistantAnswer
-
+from constants import FORM_ACTION_NAME
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 from sklearn.metrics.pairwise import cosine_similarity
 from random import randint
@@ -45,7 +45,7 @@ class FactModule:
         self.predictor = FactGenerator(config)
 
     def run(self, assistant, parameters_dict):
-        intent = parameters_dict["Intent"]
+        intent = parameters_dict[FORM_ACTION_NAME]
         answer = None
         if intent == "Welcome":
             answer = AssistantAnswer(mc.FACTS_MODULE_INTRODUCTION_MESSAGE)

@@ -5,6 +5,7 @@ class AssistantAnswer:
         self.__is_error = is_error
         self.__message = message_str
         self.__picture = kwargs.get("picture", None)
+        self.__dialog_step = 0
 
     @property
     def message_key(self):
@@ -28,3 +29,11 @@ class AssistantAnswer:
     @property
     def picture(self):
         return self.__picture
+
+    @property
+    def dialog_step(self)-> int:
+        return self.__dialog_step
+
+    @dialog_step.setter
+    def dialog_step(self, val: int):
+        self.__dialog_step = val

@@ -6,6 +6,7 @@ from configs.config_constants import TicTacToeFontPath
 from io import BytesIO
 from copy import deepcopy
 import random
+from constants import FORM_ACTION_NAME
 
 
 class TicTacToeModule:
@@ -19,9 +20,8 @@ class TicTacToeModule:
     def is_active(self):
         return self.is_started
 
-
     def run(self, assistant, parameters_dict):
-        intent = parameters_dict["Intent"]
+        intent = parameters_dict[FORM_ACTION_NAME]
         answer = None
         if intent == "Start Tic-Tac-Toe Game":
             answer = self.start(assistant, parameters_dict)

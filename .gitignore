@@ -2,3 +2,4 @@
 __pycache__
 histories/history*.txt
 data/word2vect_300.bin
+src/configs/config.ini
