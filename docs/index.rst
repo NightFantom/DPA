@@ -40,6 +40,17 @@ Papers
 ======
 Open source platform Digital Personal Assistant: `https://arxiv.org/abs/1801.03650 <https://arxiv.org/abs/1801.03650>`_
 
+Messengers
+==========
+
+WhatsApp module installation instruction:
+
+1. Clone WhatsApp-framework(forked) : https://github.com/RedMoon32/whatsapp-framework
+2. Follow instructions of installations and configuring
+3. Add project to sources(if you work in Pycharm), or  add the path to framework using sys.path
+   (in interface/__init__.py)
+4. Now you can run assistant on WhatsApp platform
+
 Other
 =====
 
