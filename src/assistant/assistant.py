@@ -100,7 +100,6 @@ class Assistant:
         return answer
 
     def mark_last(self, mark: int):
-        print("Keys:",self.__history.keys())
         return self.mark(list(self.__history.keys())[-1], mark)
 
     def __get_module_by_class_name(self, clazz):
