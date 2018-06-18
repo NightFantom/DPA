@@ -10,8 +10,8 @@ USER_ASKS_PATTERN = "{} {} asks: '{}'"
 
 class WhatsApp(Messenger):
 
-    def __init__(self, language_model, intent_detector, message_bundle, config):
-        super().__init__(language_model, intent_detector, message_bundle, config)
+    def __init__(self, language_model, intent_detector, config):
+        super().__init__(language_model, intent_detector,  config)
 
 
     def start(self):
