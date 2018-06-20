@@ -17,7 +17,7 @@ class Form:
     def get_parameters_value(self):
         return self.__parameters_value
 
-    def process(self, request_information):
+    def     process(self, request_information):
         token_list = request_information.get_tokens_list()
         parameters_list = self.__int_desc.get_parameters_list()
         for token in token_list:
