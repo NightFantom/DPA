@@ -10,13 +10,13 @@ from interface.base_interface import BaseInterface
 from interface.Messenger import Messenger
 from interface.Messenger import *
 
-socks = None
+socks =None
 
 
 class Telegram(Messenger):
 
-    def __init__(self, language_model, intent_detector: IntentDetector, config):
-        super().__init__(language_model, intent_detector,  config)
+    def __init__(self, language_model, intent_detector: IntentDetector,message_bundle, config):
+        super().__init__(language_model, intent_detector,message_bundle,  config)
         self.__token = self.config[TokenKey]
         self.__updater = Updater(self.__token, request_kwargs=socks)
         self.__START_MESSAGE_KEY = self.config[StartMessageKey]
@@ -39,7 +39,7 @@ class Telegram(Messenger):
                 bot.sendPhoto(user_id, photo=image)
 
     def slash_start(self, bot, update):
-        bot.sendMessage(update.message.chat_id, text=self.config[self.__START_MESSAGE_KEY])
+        bot.sendMessage(update.message.chat_id, text=self.message_bundle[self.__START_MESSAGE_KEY])
 
     def slash_stop(self, bot, update):
         user_id: int = update.message.chat_id
@@ -47,7 +47,7 @@ class Telegram(Messenger):
         if assistant is not None:
             assistant.stop()
             del self.user_assistant_dict[user_id]
-            bot.sendMessage(update.message.chat_id, text=self.config[STOP_MESSAGE_KEY])
+            bot.sendMessage(update.message.chat_id, text=self.message_bundle[STOP_MESSAGE_KEY])
 
     def evaluate(self, bot: Bot, update):
         query = update.callback_query

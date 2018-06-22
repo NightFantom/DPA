@@ -23,8 +23,12 @@ WHATSAPP = "whatsapp"
 def start():
     print("Started initialization")
     config_list = ["configs/config.ini" if os.path.isfile("configs/config.ini")
-                   else "config/default_config.ini",
-                   "language/models/en/message.ini"]
+                   else "config/default_config.ini"]
+
+    config_parser = ConfigParser()
+    config_parser.read( "language/models/en/message.ini", encoding="utf-8")
+    message_bundle=config_parser["DEFAULT"]
+
     config = ConfigManager(config_list)
 
     logging.basicConfig(level=config[LogLevelKey],
@@ -47,9 +51,8 @@ def start():
     detector: IntentDetector = IntentDetector(config, app_dict, w2v)
 
     interface_type = config[InterfaceTypeKey]
-    interface_type = CONSOLE
     interface_class = get_interface(interface_type)
-    interface = interface_class(language_model, detector, config)
+    interface = interface_class(language_model, detector,message_bundle, config)
 
     if interface_type == CONSOLE:
         print(STARTED_WORKING_MESSAGE)

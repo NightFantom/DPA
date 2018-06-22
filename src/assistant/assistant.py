@@ -26,8 +26,9 @@ class Assistant:
     __DIALOG_STEP: str = "dialog_step"
     __NO_MARK: int = -1
 
-    def __init__(self, language_model,  config, intent_detector: IntentDetector, **kargs):
+    def __init__(self, language_model, message_bundle, config, intent_detector: IntentDetector, **kargs):
         self.language_model = language_model
+        self.__message_bundle = message_bundle
         self.__stack = []
         self.__history: OrderedDict = OrderedDict()
         self.__config = config
@@ -99,7 +100,7 @@ class Assistant:
         return answer
 
     def mark_last(self, mark: int):
-        print("Keys:",self.__history.keys())
+        print("Keys:", self.__history.keys())
         return self.mark(list(self.__history.keys())[-1], mark)
 
     def __get_module_by_class_name(self, clazz):
@@ -165,7 +166,7 @@ class Assistant:
     def format_answer(self, answer):
         message: str = None
         if answer.message_key is not None:
-            message = self.__config[answer.message_key]
+            message = self.__message_bundle[answer.message_key]
             if message:
                 params = answer.parameters
                 if params is not None:
