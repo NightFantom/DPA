@@ -10,13 +10,13 @@ from interface.base_interface import BaseInterface
 from interface.Messenger import Messenger
 from interface.Messenger import *
 
-socks = None
+socks =None
 
 
 class Telegram(Messenger):
 
-    def __init__(self, language_model, intent_detector: IntentDetector, message_bundle, config):
-        super().__init__(language_model, intent_detector, message_bundle, config)
+    def __init__(self, language_model, intent_detector: IntentDetector,message_bundle, config):
+        super().__init__(language_model, intent_detector,message_bundle,  config)
         self.__token = self.config[TokenKey]
         self.__updater = Updater(self.__token, request_kwargs=socks)
         self.__START_MESSAGE_KEY = self.config[StartMessageKey]

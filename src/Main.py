@@ -12,6 +12,7 @@ from threading import Thread
 from distutils.util import strtobool
 import logging
 import os
+from configs.ConfigManager import ConfigManager
 
 STARTED_WORKING_MESSAGE = "Assistant started working"
 TELEGRAM = "telegram"
@@ -21,43 +22,42 @@ WHATSAPP = "whatsapp"
 
 def start():
     print("Started initialization")
-    config_path = "configs/config.ini"
-    if not os.path.isfile(config_path):
-        config_path = "configs/default_config.ini"
-    config_parser = ConfigParser()
-    config_parser.read(config_path, encoding="utf-8")
-    default_config = config_parser["DEFAULT"]
+    config_list = ["configs/config.ini" if os.path.isfile("configs/config.ini")
+                   else "config/default_config.ini"]
 
-    logging.basicConfig(level=default_config[LogLevelKey],
+    config_parser = ConfigParser()
+    config_parser.read( "language/models/en/message.ini", encoding="utf-8")
+    message_bundle=config_parser["DEFAULT"]
+
+    config = ConfigManager(config_list)
+
+    logging.basicConfig(level=config[LogLevelKey],
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.info("Stub mode: {}".format(config[IsStubMode]))
 
-    logging.info("Stub mode: {}".format(default_config[IsStubMode]))
-
-    language_model = EnglishLanguageModel(default_config)
+    language_model = EnglishLanguageModel(config)
     logging.info("Selected {} language mode".format(language_model.get_language_name()))
-
-    config_parser = ConfigParser()
-    config_parser.read("language/models/en/message.ini", encoding="utf-8")
-    message_bundle = config_parser["DEFAULT"]
 
     app_dict = load_config("ApplicationConfig.json", language_model)
 
     print("Started initialization of Word2Vect")
-    is_binary_w2v = strtobool(default_config[W2VModelFileTypeKey])
-    w2v = KeyedVectors.load_word2vec_format(default_config[W2VModelPathKey], binary=is_binary_w2v)
+
+    is_binary_w2v = strtobool(config[W2VModelFileTypeKey])
+
+    w2v = KeyedVectors.load_word2vec_format(config[W2VModelPathKey], binary=is_binary_w2v)
+
     print("Making assistant")
 
-    detector: IntentDetector = IntentDetector(default_config, app_dict, w2v)
+    detector: IntentDetector = IntentDetector(config, app_dict, w2v)
 
-    interface_type = default_config[InterfaceTypeKey]
-    interface_type = WHATSAPP
+    interface_type = config[InterfaceTypeKey]
     interface_class = get_interface(interface_type)
-    interface = interface_class(language_model, detector, message_bundle, default_config)
+    interface = interface_class(language_model, detector,message_bundle, config)
 
     if interface_type == CONSOLE:
         print(STARTED_WORKING_MESSAGE)
         interface.start()
-    elif interface_type == TELEGRAM or interface_type==WHATSAPP:
+    elif interface_type == TELEGRAM or interface_type == WHATSAPP:
         assistant_thread = Thread(target=interface, name="Assistant")
         assistant_thread.start()
         print(STARTED_WORKING_MESSAGE)
