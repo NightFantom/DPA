@@ -10,7 +10,7 @@ from application.data_type import DataType
 from application.intent import *
 from unittest.mock import Mock
 
-corenlp = {'CoreNLPServerAddress': 'http://localhost:9000'}
+#corenlp = {'CoreNLPServerAddress': 'http://localhost:9000'}
 #
 class FormTest(unittest.TestCase):
     def test1(self):
