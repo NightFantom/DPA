@@ -10,8 +10,7 @@ from application.data_type import DataType
 from application.intent import *
 from unittest.mock import Mock
 
-#corenlp = {'CoreNLPServerAddress': 'http://localhost:9000'}
-#
+
 class FormTest(unittest.TestCase):
     def test1(self):
         app = Mock()
@@ -45,8 +44,8 @@ class FormTest(unittest.TestCase):
         param.get_name = Mock(return_value="Play")
         param.get_data_type = Mock(return_value=DataType.STR)
         param.is_obligatory = Mock(return_value=True)
-        param.get_clarifying_question=Mock(return_value='Question')
-        param.group_ids=[]
+        param.get_clarifying_question = Mock(return_value='Question')
+        param.group_ids = []
         params = [param]
         intent_description.get_parameters_list = Mock(return_value=params)
 
@@ -61,7 +60,7 @@ class FormTest(unittest.TestCase):
 
         ans = form.process(request)
         self.assertIsNotNone(ans)
-        self.assertEqual(ans.message,param.get_clarifying_question())
+        self.assertEqual(ans.message, param.get_clarifying_question())
         self.assertFalse(form.is_finish())
 
     def test3(self):
@@ -93,7 +92,7 @@ class FormTest(unittest.TestCase):
         ans = form.process(request)
         self.assertIsNone(ans)
         self.assertTrue(form.is_finish())
-        self.assertEqual(form.get_parameters_value(),{'action_name': 'Say goodbye'})
+        self.assertEqual(form.get_parameters_value(), {'action_name': 'Say goodbye'})
 
     def test4(self):
         app = Mock()
@@ -103,8 +102,6 @@ class FormTest(unittest.TestCase):
         param.get_name = Mock(return_value="name")
         param.get_data_type = Mock(return_value=DataType.NUMBER)
         param.is_obligatory = Mock(return_value=True)
-        param.get_clarifying_question = Mock(return_value='Question')
-        param.group_ids = []
         params = [param]
         intent_description.get_parameters_list = Mock(return_value=params)
 
@@ -120,6 +117,7 @@ class FormTest(unittest.TestCase):
         ans = form.process(request)
         self.assertIsNone(ans)
         self.assertTrue(form.is_finish())
+
 
 if __name__ == '__main__':
     unittest.main()
