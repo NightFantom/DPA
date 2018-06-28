@@ -76,7 +76,6 @@ class FormTest(unittest.TestCase):
 
         param.get_data_type = Mock(return_value=[])
         param.is_obligatory = Mock(return_value=False)
-        params = [param]
 
         intent_description = Mock()
         intent_description.get_name = Mock(return_value="Say goodbye")
