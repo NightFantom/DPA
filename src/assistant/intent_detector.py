@@ -1,5 +1,5 @@
 from typing import Dict, Any
-
+from configs.ConfigManager import ConfigManager
 from application.application import Application
 from language.models.language_model import RequestInformation
 from configs.config_constants import WMDThresholdKey
@@ -8,7 +8,7 @@ from gensim.models.keyedvectors import KeyedVectors
 
 class IntentDetector:
 
-    def __init__(self, config: Dict[str, Any], application_dict: Dict[str, Application], w2v: KeyedVectors):
+    def __init__(self, config: ConfigManager, application_dict: Dict[str, Application], w2v: KeyedVectors): 
         self.__config = config
         self.__application_dict = application_dict
         self.__w2v = w2v

@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 from application.application_config import load_config
 from assistant.intent_detector import IntentDetector
-
+from configs.ConfigManager import ConfigManager
 from interface.console import Console
 from interface.telegram import Telegram
 from interface.whatsapp import WhatsApp
@@ -21,12 +21,11 @@ WHATSAPP = "whatsapp"
 
 def start():
     print("Started initialization")
-    config_path = "configs/config.ini"
-    if not os.path.isfile(config_path):
-        config_path = "configs/default_config.ini"
-    config_parser = ConfigParser()
-    config_parser.read(config_path, encoding="utf-8")
-    default_config = config_parser["DEFAULT"]
+    paths = []
+    if os.path.isfile("configs/config.ini"):
+        paths.append("configs/config.ini")
+    paths.append("configs/default_config.ini")
+    default_config = ConfigManager(paths)
 
     logging.basicConfig(level=default_config[LogLevelKey],
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
