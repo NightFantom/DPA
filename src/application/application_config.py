@@ -4,8 +4,6 @@ from application.application import IntegrationType
 from application.intent import Intent
 from application.parameter import Parameter
 from application.data_type import DataType
-from language.models.ru.RussianModel import RussianLanguageModel
-from language.models.en.english_language_model import EnglishLanguageModel
 APPLICATIONS_TAG = "applications"
 APPLICATION_TURN_ON = "turn_on"
 APPLICATION_NAME_TAG = "name"
