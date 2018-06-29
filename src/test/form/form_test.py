@@ -70,13 +70,6 @@ class FormTest(unittest.TestCase):
         token.get_NER_type = Mock(return_value=None)
         token.get_word = Mock(return_value="Goodbye")
         tokens.append(token)
-
-        param = Mock()
-        param.get_name = Mock(return_value="Param")
-
-        param.get_data_type = Mock(return_value=[])
-        param.is_obligatory = Mock(return_value=False)
-
         intent_description = Mock()
         intent_description.get_name = Mock(return_value="Say goodbye")
         intent_description.get_parameters_list = Mock(return_value=[])
@@ -116,7 +109,3 @@ class FormTest(unittest.TestCase):
         ans = form.process(request)
         self.assertIsNone(ans)
         self.assertTrue(form.is_finish())
-
-
-if __name__ == '__main__':
-    unittest.main()
